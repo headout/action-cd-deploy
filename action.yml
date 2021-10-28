@@ -1,0 +1,15 @@
+name: '"EKSCTL" Action For GitHub Actions'
+description: "Configure AWS credential and region environment variables for use with the AWS CLI and AWS SDKs"
+branding:
+  icon: "cloud"
+  color: "orange"
+inputs:
+  deploy-env:
+    description: "The target environment to deploy the built image."
+    required: true
+  garden-version:
+    description: "Version to use for Garden CLI"
+    required: false
+runs:
+  using: "node12"
+  main: "dist/index.js"
