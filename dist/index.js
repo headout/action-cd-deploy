@@ -3353,7 +3353,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.setupGarden = void 0;
 const core = __importStar(__webpack_require__(470));
-const fs_1 = __webpack_require__(747);
 const system_1 = __webpack_require__(913);
 const tc = __importStar(__webpack_require__(533));
 const core_1 = __webpack_require__(470);
@@ -3406,11 +3405,9 @@ function installGarden(inpVersion) {
         }
         if (astBinary && astCheck) {
             (0, core_1.info)(`Found matching tar: "${astBinary.name}". Downloading...`);
-            const tarPath = yield tc.downloadTool(astBinary.browser_download_url);
+            const tarPath = yield tc.downloadTool(astBinary.browser_download_url, astBinary.name);
             const binaryPath = yield tc.extractTar(tarPath);
-            yield fs_1.promises.chmod(binaryPath, 0o755);
-            const destPath = "garden";
-            return yield tc.cacheFile(binaryPath, destPath, constants_1.default.GARDEN_CACHE_KEY, release.tag_name);
+            return yield tc.cacheDir(binaryPath, constants_1.default.GARDEN_CACHE_KEY, release.tag_name);
         }
     });
 }
