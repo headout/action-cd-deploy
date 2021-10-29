@@ -63,15 +63,17 @@ function setupCluster() {
 }
 exports.setupCluster = setupCluster;
 function loginToCluster(deployEnv) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const matchedCluster = exports.CLUSTERS.find((cluster) => cluster.matchDeployEnv(deployEnv));
         if (!matchedCluster)
             throw new Error('unable to find any valid cluster');
         (0, core_1.info)(`Deploying to cluster: ${JSON.stringify(matchedCluster)}`);
         const cmd = `eksctl utils write-kubeconfig --region "${matchedCluster.clusterRegion}" --cluster "${matchedCluster.clusterName}"`;
-        (0, core_1.info)(`Executing: "${cmd}"`);
-        const { stdout } = yield exec.command(cmd);
-        (0, core_1.info)(stdout);
+        (0, core_1.info)(`Executing: ${cmd}`);
+        const cp = exec.command(cmd);
+        (_a = cp.stdout) === null || _a === void 0 ? void 0 : _a.pipe(process.stdout);
+        yield cp;
         return matchedCluster;
     });
 }
