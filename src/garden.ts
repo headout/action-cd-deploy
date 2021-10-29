@@ -48,8 +48,9 @@ async function installGarden(inpVersion: string): Promise<string | undefined> {
         else astBinary = asset;
     }
     if (astBinary && astCheck) {
-        info(`Found matching binary: "${astBinary.name}". Downloading...`)
-        const binaryPath = await tc.downloadTool(astBinary.browser_download_url)
+        info(`Found matching tar: "${astBinary.name}". Downloading...`)
+        const tarPath = await tc.downloadTool(astBinary.browser_download_url)
+        const binaryPath = await tc.extractTar(tarPath)
         await fs.chmod(binaryPath, 0o755);
         const destPath = "garden";
         return await tc.cacheFile(
