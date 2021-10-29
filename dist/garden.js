@@ -85,8 +85,9 @@ function installGarden(inpVersion) {
                 astBinary = asset;
         }
         if (astBinary && astCheck) {
-            (0, core_1.info)(`Found matching binary: "${astBinary.name}". Downloading...`);
-            const binaryPath = yield tc.downloadTool(astBinary.browser_download_url);
+            (0, core_1.info)(`Found matching tar: "${astBinary.name}". Downloading...`);
+            const tarPath = yield tc.downloadTool(astBinary.browser_download_url);
+            const binaryPath = yield tc.extractTar(tarPath);
             yield fs_1.promises.chmod(binaryPath, 0o755);
             const destPath = "garden";
             return yield tc.cacheFile(binaryPath, destPath, constants_1.default.GARDEN_CACHE_KEY, release.tag_name);

@@ -397,6 +397,13 @@ function copyFile(srcFile, destFile, force) {
 
 /***/ }),
 
+/***/ 3:
+/***/ (function(module) {
+
+module.exports = require("console");
+
+/***/ }),
+
 /***/ 9:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -3398,8 +3405,9 @@ function installGarden(inpVersion) {
                 astBinary = asset;
         }
         if (astBinary && astCheck) {
-            (0, core_1.info)(`Found matching binary: "${astBinary.name}". Downloading...`);
-            const binaryPath = yield tc.downloadTool(astBinary.browser_download_url);
+            (0, core_1.info)(`Found matching tar: "${astBinary.name}". Downloading...`);
+            const tarPath = yield tc.downloadTool(astBinary.browser_download_url);
+            const binaryPath = yield tc.extractTar(tarPath);
             yield fs_1.promises.chmod(binaryPath, 0o755);
             const destPath = "garden";
             return yield tc.cacheFile(binaryPath, destPath, constants_1.default.GARDEN_CACHE_KEY, release.tag_name);
@@ -5928,14 +5936,17 @@ const core = __importStar(__webpack_require__(470));
 const core_1 = __webpack_require__(470);
 // @ts-ignore
 const await_exec_1 = __importDefault(__webpack_require__(702));
+const console_1 = __webpack_require__(3);
 function deployService(cluster) {
     return __awaiter(this, void 0, void 0, function* () {
         core.startGroup('Deploy Service');
         let cmd = `garden deploy --env ${cluster.gardenEnv}`;
+        let cmdEnv = { GARDEN_LOGGER_TYPE: "basic", NAMESPACE: "cd" };
+        (0, console_1.info)(`Setting env: ${JSON.stringify(cmdEnv)}`);
         try {
             yield (0, await_exec_1.default)(cmd, {
                 log: true,
-                env: Object.assign(Object.assign({}, process.env), { GARDEN_LOGGER_TYPE: "basic", NAMESPACE: "cd" })
+                env: Object.assign(Object.assign({}, process.env), cmdEnv)
             });
         }
         catch (ex) {

@@ -36,14 +36,17 @@ const core = __importStar(require("@actions/core"));
 const core_1 = require("@actions/core");
 // @ts-ignore
 const await_exec_1 = __importDefault(require("await-exec"));
+const console_1 = require("console");
 function deployService(cluster) {
     return __awaiter(this, void 0, void 0, function* () {
         core.startGroup('Deploy Service');
         let cmd = `garden deploy --env ${cluster.gardenEnv}`;
+        let cmdEnv = { GARDEN_LOGGER_TYPE: "basic", NAMESPACE: "cd" };
+        (0, console_1.info)(`Setting env: ${JSON.stringify(cmdEnv)}`);
         try {
             yield (0, await_exec_1.default)(cmd, {
                 log: true,
-                env: Object.assign(Object.assign({}, process.env), { GARDEN_LOGGER_TYPE: "basic", NAMESPACE: "cd" })
+                env: Object.assign(Object.assign({}, process.env), cmdEnv)
             });
         }
         catch (ex) {
