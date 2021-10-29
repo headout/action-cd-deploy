@@ -45,10 +45,12 @@ async function loginToCluster(deployEnv: string): Promise<ICluster> {
     info(`Deploying to cluster: ${JSON.stringify(matchedCluster)}`)
     const cmd = `eksctl utils write-kubeconfig --region "${matchedCluster.clusterRegion}" --cluster "${matchedCluster.clusterName}"`
     info(`Executing: "${cmd}"`)
-    exec.command(cmd).stdout?.pipe(process.stdout)
+    const { stdout } = await exec.command(cmd)
+    info(stdout)
     return matchedCluster
 }
 
 async function assertCurrentContext() {
-    exec.command('kubectl config get-contexts').stdout?.pipe(process.stdout)
+    const { stdout } = await exec.command('kubectl config get-contexts')
+    info(stdout)
 }
