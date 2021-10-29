@@ -1,7 +1,6 @@
 import * as core from '@actions/core'
 import { debug, info, warning } from '@actions/core'
-// @ts-ignore
-import exec from 'await-exec'
+import * as exec from 'execa'
 
 export interface ICluster {
     clusterName: string
@@ -43,6 +42,8 @@ async function loginToCluster(deployEnv: string): Promise<ICluster> {
     const matchedCluster = CLUSTERS.find((cluster) => cluster.matchDeployEnv(deployEnv))
     if (!matchedCluster) throw new Error('unable to find any valid cluster')
     info(`Deploying to cluster: ${JSON.stringify(matchedCluster)}`)
-    await exec(`eksctl utils write-kubeconfig --region "${matchedCluster.clusterRegion}" --cluster "${matchedCluster.clusterName}"`, { log: true })
+    const cmd = `eksctl utils write-kubeconfig --region "${matchedCluster.clusterRegion}" --cluster "${matchedCluster.clusterName}"`
+    info(`Executing: "${cmd}"`)
+    exec.command(cmd).stdout?.pipe(process.stdout)
     return matchedCluster
 }

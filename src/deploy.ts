@@ -1,23 +1,15 @@
 import * as core from '@actions/core'
-import { error } from '@actions/core'
+import { info, error } from '@actions/core'
 import { ICluster } from "./clusters"
-// @ts-ignore
-import exec from 'await-exec'
-import { info } from 'console'
+import * as exec from 'execa'
 
 export async function deployService(cluster: ICluster) {
     core.startGroup('Deploy Service')
     let cmd = `garden deploy --env ${cluster.gardenEnv}`
     let cmdEnv = { GARDEN_LOGGER_TYPE: "basic", NAMESPACE: "cd" }
-    info(`Setting env: ${JSON.stringify(cmdEnv)}`)
+    info(`Executing "${cmd}" with env: ${JSON.stringify(cmdEnv)}`)
     try {
-        await exec(
-            cmd,
-            {
-                log: true,
-                env: { ...process.env, ...cmdEnv }
-            }
-        )
+        exec.command(cmd, { env: cmdEnv }).stdout?.pipe(process.stdout)
     } catch (ex) {
         error(`Unable to deploy, error: ${ex}`)
         throw ex
