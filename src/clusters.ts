@@ -31,6 +31,7 @@ export async function setupCluster(): Promise<ICluster> {
     core.startGroup('Setup Cluster')
     const deployEnv = core.getInput('deploy-env', { required: true })
     const cluster = await loginToCluster(deployEnv)
+    await assertCurrentContext()
     core.setOutput('cluster-name', cluster.clusterName)
     core.setOutput('cluster-region', cluster.clusterRegion)
     core.setOutput('is-production', cluster.isProduction)
@@ -46,4 +47,8 @@ async function loginToCluster(deployEnv: string): Promise<ICluster> {
     info(`Executing: "${cmd}"`)
     exec.command(cmd).stdout?.pipe(process.stdout)
     return matchedCluster
+}
+
+async function assertCurrentContext() {
+    exec.command('kubectl config get-contexts').stdout?.pipe(process.stdout)
 }
