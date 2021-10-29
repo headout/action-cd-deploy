@@ -27,20 +27,26 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deployService = void 0;
 const core = __importStar(require("@actions/core"));
 const core_1 = require("@actions/core");
-const exec = __importStar(require("execa"));
+const execa_1 = __importDefault(require("execa"));
 function deployService(cluster) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         core.startGroup('Deploy Service');
-        let cmd = `garden deploy --env ${cluster.gardenEnv}`;
+        const { stdout: context } = yield (0, execa_1.default)('kubectl', ['config', 'current-context']);
+        let cmd = `garden deploy --env ${cluster.gardenEnv} --var kubeContext=${context}`;
         let cmdEnv = { GARDEN_LOGGER_TYPE: "basic", NAMESPACE: "cd" };
         (0, core_1.info)(`Executing "${cmd}" with env: ${JSON.stringify(cmdEnv)}`);
         try {
-            (_a = exec.command(cmd, { env: cmdEnv }).stdout) === null || _a === void 0 ? void 0 : _a.pipe(process.stdout);
+            const cp = execa_1.default.command(cmd, { env: cmdEnv });
+            (_a = cp.stdout) === null || _a === void 0 ? void 0 : _a.pipe(process.stdout);
+            yield cp;
         }
         catch (ex) {
             (0, core_1.error)(`Unable to deploy, error: ${ex}`);

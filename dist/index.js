@@ -6785,7 +6785,6 @@ function setupCluster() {
 }
 exports.setupCluster = setupCluster;
 function loginToCluster(deployEnv) {
-    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const matchedCluster = exports.CLUSTERS.find((cluster) => cluster.matchDeployEnv(deployEnv));
         if (!matchedCluster)
@@ -6793,14 +6792,15 @@ function loginToCluster(deployEnv) {
         (0, core_1.info)(`Deploying to cluster: ${JSON.stringify(matchedCluster)}`);
         const cmd = `eksctl utils write-kubeconfig --region "${matchedCluster.clusterRegion}" --cluster "${matchedCluster.clusterName}"`;
         (0, core_1.info)(`Executing: "${cmd}"`);
-        (_a = exec.command(cmd).stdout) === null || _a === void 0 ? void 0 : _a.pipe(process.stdout);
+        const { stdout } = yield exec.command(cmd);
+        (0, core_1.info)(stdout);
         return matchedCluster;
     });
 }
 function assertCurrentContext() {
-    var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        (_a = exec.command('kubectl config get-contexts').stdout) === null || _a === void 0 ? void 0 : _a.pipe(process.stdout);
+        const { stdout } = yield exec.command('kubectl config get-contexts');
+        (0, core_1.info)(stdout);
     });
 }
 
@@ -8427,20 +8427,26 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deployService = void 0;
 const core = __importStar(__webpack_require__(470));
 const core_1 = __webpack_require__(470);
-const exec = __importStar(__webpack_require__(955));
+const execa_1 = __importDefault(__webpack_require__(955));
 function deployService(cluster) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         core.startGroup('Deploy Service');
-        let cmd = `garden deploy --env ${cluster.gardenEnv}`;
+        const { stdout: context } = yield (0, execa_1.default)('kubectl', ['config', 'current-context']);
+        let cmd = `garden deploy --env ${cluster.gardenEnv} --var kubeContext=${context}`;
         let cmdEnv = { GARDEN_LOGGER_TYPE: "basic", NAMESPACE: "cd" };
         (0, core_1.info)(`Executing "${cmd}" with env: ${JSON.stringify(cmdEnv)}`);
         try {
-            (_a = exec.command(cmd, { env: cmdEnv }).stdout) === null || _a === void 0 ? void 0 : _a.pipe(process.stdout);
+            const cp = execa_1.default.command(cmd, { env: cmdEnv });
+            (_a = cp.stdout) === null || _a === void 0 ? void 0 : _a.pipe(process.stdout);
+            yield cp;
         }
         catch (ex) {
             (0, core_1.error)(`Unable to deploy, error: ${ex}`);

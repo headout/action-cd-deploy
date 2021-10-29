@@ -63,7 +63,6 @@ function setupCluster() {
 }
 exports.setupCluster = setupCluster;
 function loginToCluster(deployEnv) {
-    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const matchedCluster = exports.CLUSTERS.find((cluster) => cluster.matchDeployEnv(deployEnv));
         if (!matchedCluster)
@@ -71,13 +70,14 @@ function loginToCluster(deployEnv) {
         (0, core_1.info)(`Deploying to cluster: ${JSON.stringify(matchedCluster)}`);
         const cmd = `eksctl utils write-kubeconfig --region "${matchedCluster.clusterRegion}" --cluster "${matchedCluster.clusterName}"`;
         (0, core_1.info)(`Executing: "${cmd}"`);
-        (_a = exec.command(cmd).stdout) === null || _a === void 0 ? void 0 : _a.pipe(process.stdout);
+        const { stdout } = yield exec.command(cmd);
+        (0, core_1.info)(stdout);
         return matchedCluster;
     });
 }
 function assertCurrentContext() {
-    var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        (_a = exec.command('kubectl config get-contexts').stdout) === null || _a === void 0 ? void 0 : _a.pipe(process.stdout);
+        const { stdout } = yield exec.command('kubectl config get-contexts');
+        (0, core_1.info)(stdout);
     });
 }
