@@ -53,6 +53,7 @@ function setupCluster() {
         core.startGroup('Setup Cluster');
         const deployEnv = core.getInput('deploy-env', { required: true });
         const cluster = yield loginToCluster(deployEnv);
+        yield assertCurrentContext();
         core.setOutput('cluster-name', cluster.clusterName);
         core.setOutput('cluster-region', cluster.clusterRegion);
         core.setOutput('is-production', cluster.isProduction);
@@ -72,5 +73,11 @@ function loginToCluster(deployEnv) {
         (0, core_1.info)(`Executing: "${cmd}"`);
         (_a = exec.command(cmd).stdout) === null || _a === void 0 ? void 0 : _a.pipe(process.stdout);
         return matchedCluster;
+    });
+}
+function assertCurrentContext() {
+    var _a;
+    return __awaiter(this, void 0, void 0, function* () {
+        (_a = exec.command('kubectl config get-contexts').stdout) === null || _a === void 0 ? void 0 : _a.pipe(process.stdout);
     });
 }
