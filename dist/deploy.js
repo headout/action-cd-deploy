@@ -27,27 +27,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deployService = void 0;
 const core = __importStar(require("@actions/core"));
 const core_1 = require("@actions/core");
-// @ts-ignore
-const await_exec_1 = __importDefault(require("await-exec"));
-const console_1 = require("console");
+const exec = __importStar(require("execa"));
 function deployService(cluster) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         core.startGroup('Deploy Service');
         let cmd = `garden deploy --env ${cluster.gardenEnv}`;
         let cmdEnv = { GARDEN_LOGGER_TYPE: "basic", NAMESPACE: "cd" };
-        (0, console_1.info)(`Setting env: ${JSON.stringify(cmdEnv)}`);
+        (0, core_1.info)(`Executing "${cmd}" with env: ${JSON.stringify(cmdEnv)}`);
         try {
-            yield (0, await_exec_1.default)(cmd, {
-                log: true,
-                env: Object.assign(Object.assign({}, process.env), cmdEnv)
-            });
+            (_a = exec.command(cmd, { env: cmdEnv }).stdout) === null || _a === void 0 ? void 0 : _a.pipe(process.stdout);
         }
         catch (ex) {
             (0, core_1.error)(`Unable to deploy, error: ${ex}`);

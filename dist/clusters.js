@@ -27,15 +27,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.setupCluster = exports.CLUSTERS = void 0;
 const core = __importStar(require("@actions/core"));
 const core_1 = require("@actions/core");
-// @ts-ignore
-const await_exec_1 = __importDefault(require("await-exec"));
+const exec = __importStar(require("execa"));
 exports.CLUSTERS = [
     {
         clusterName: 'headout',
@@ -66,12 +62,15 @@ function setupCluster() {
 }
 exports.setupCluster = setupCluster;
 function loginToCluster(deployEnv) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const matchedCluster = exports.CLUSTERS.find((cluster) => cluster.matchDeployEnv(deployEnv));
         if (!matchedCluster)
             throw new Error('unable to find any valid cluster');
         (0, core_1.info)(`Deploying to cluster: ${JSON.stringify(matchedCluster)}`);
-        yield (0, await_exec_1.default)(`eksctl utils write-kubeconfig --region "${matchedCluster.clusterRegion}" --cluster "${matchedCluster.clusterName}"`, { log: true });
+        const cmd = `eksctl utils write-kubeconfig --region "${matchedCluster.clusterRegion}" --cluster "${matchedCluster.clusterName}"`;
+        (0, core_1.info)(`Executing: "${cmd}"`);
+        (_a = exec.command(cmd).stdout) === null || _a === void 0 ? void 0 : _a.pipe(process.stdout);
         return matchedCluster;
     });
 }
