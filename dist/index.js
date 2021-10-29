@@ -3370,7 +3370,7 @@ function setupGarden() {
             installPath = yield installGarden(inpVersion);
         }
         if (installPath) {
-            (0, core_1.info)('Added Garden to path');
+            (0, core_1.info)(`Added Garden CLI to PATH: "${installPath}"`);
             core.addPath(installPath);
         }
         core.endGroup();
@@ -3398,6 +3398,7 @@ function installGarden(inpVersion) {
                 astBinary = asset;
         }
         if (astBinary && astCheck) {
+            (0, core_1.info)(`Found matching binary: "${astBinary.name}". Downloading...`);
             const binaryPath = yield tc.downloadTool(astBinary.browser_download_url);
             yield fs_1.promises.chmod(binaryPath, 0o755);
             const destPath = "garden";
@@ -5591,41 +5592,24 @@ module.exports = v4;
 /***/ }),
 
 /***/ 913:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports) {
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getPlatform = void 0;
-const os = __importStar(__webpack_require__(87));
 function getPlatform() {
     let targetPlat;
-    let plat = os.platform();
+    let plat = process.platform;
     switch (plat) {
         case "linux":
             targetPlat = "linux";
             break;
         case "darwin":
             targetPlat = "macos";
+            break;
+        case "win32":
+            targetPlat = "windows";
             break;
         default:
             targetPlat = plat;

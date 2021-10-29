@@ -57,7 +57,7 @@ function setupGarden() {
             installPath = yield installGarden(inpVersion);
         }
         if (installPath) {
-            (0, core_1.info)('Added Garden to path');
+            (0, core_1.info)(`Added Garden CLI to PATH: "${installPath}"`);
             core.addPath(installPath);
         }
         core.endGroup();
@@ -85,6 +85,7 @@ function installGarden(inpVersion) {
                 astBinary = asset;
         }
         if (astBinary && astCheck) {
+            (0, core_1.info)(`Found matching binary: "${astBinary.name}". Downloading...`);
             const binaryPath = yield tc.downloadTool(astBinary.browser_download_url);
             yield fs_1.promises.chmod(binaryPath, 0o755);
             const destPath = "garden";
