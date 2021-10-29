@@ -72,7 +72,8 @@ function installGarden(inpVersion) {
         else {
             url = 'https://api.github.com/repos/garden-io/garden/releases/latest';
         }
-        let release = yield findValidAsset(url, `${(0, system_1.getPlatform)()}-amd64`);
+        let folderName = `${(0, system_1.getPlatform)()}-amd64`;
+        let release = yield findValidAsset(url, folderName);
         (0, core_1.info)(`Found valid Garden release: ${release.tag_name}`);
         let astBinary;
         let astCheck;
@@ -86,7 +87,8 @@ function installGarden(inpVersion) {
         if (astBinary && astCheck) {
             (0, core_1.info)(`Found matching tar: "${astBinary.name}". Downloading...`);
             const tarPath = yield tc.downloadTool(astBinary.browser_download_url, astBinary.name);
-            const binaryPath = yield tc.extractTar(tarPath);
+            const binaryPath = `${yield tc.extractTar(tarPath)}/${folderName}`;
+            (0, core_1.info)(`Extracted tar to path: "${binaryPath}"`);
             return yield tc.cacheDir(binaryPath, constants_1.default.GARDEN_CACHE_KEY, release.tag_name);
         }
     });
