@@ -3,8 +3,9 @@ import { debug, info, warning } from '@actions/core'
 // @ts-ignore
 import exec from 'await-exec'
 
-interface ICluster {
+export interface ICluster {
     clusterName: string
+    gardenEnv: string
     clusterRegion: string
     isProduction: boolean
     matchDeployEnv: (deployEnv: string) => boolean
@@ -14,18 +15,20 @@ export const CLUSTERS: ICluster[] = [
     {
         clusterName: 'headout',
         clusterRegion: 'us-east-1',
+        gardenEnv: "production",
         isProduction: true,
         matchDeployEnv: (deployEnv) => deployEnv === 'production'
     },
     {
         clusterName: 'test-cluster',
         clusterRegion: 'ap-south-1',
+        gardenEnv: "test",
         isProduction: false,
         matchDeployEnv: () => true
     }
 ]
 
-export async function setupCluster() {
+export async function setupCluster(): Promise<ICluster> {
     core.startGroup('Setup Cluster')
     const deployEnv = core.getInput('deploy-env', { required: true })
     const cluster = await loginToCluster(deployEnv)
@@ -33,6 +36,7 @@ export async function setupCluster() {
     core.setOutput('cluster-region', cluster.clusterRegion)
     core.setOutput('is-production', cluster.isProduction)
     core.endGroup()
+    return cluster
 }
 
 async function loginToCluster(deployEnv: string): Promise<ICluster> {
