@@ -44,9 +44,10 @@ async function loginToCluster(deployEnv: string): Promise<ICluster> {
     if (!matchedCluster) throw new Error('unable to find any valid cluster')
     info(`Deploying to cluster: ${JSON.stringify(matchedCluster)}`)
     const cmd = `eksctl utils write-kubeconfig --region "${matchedCluster.clusterRegion}" --cluster "${matchedCluster.clusterName}"`
-    info(`Executing: "${cmd}"`)
-    const { stdout } = await exec.command(cmd)
-    info(stdout)
+    info(`Executing: ${cmd}`)
+    const cp = exec.command(cmd)
+    cp.stdout?.pipe(process.stdout)
+    await cp
     return matchedCluster
 }
 
