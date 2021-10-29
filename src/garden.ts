@@ -25,7 +25,7 @@ export async function setupGarden() {
         installPath = await installGarden(inpVersion)
     }
     if (installPath) {
-        info('Added Garden to path')
+        info(`Added Garden CLI to PATH: "${installPath}"`)
         core.addPath(installPath)
     }
     core.endGroup()
@@ -48,6 +48,7 @@ async function installGarden(inpVersion: string): Promise<string | undefined> {
         else astBinary = asset;
     }
     if (astBinary && astCheck) {
+        info(`Found matching binary: "${astBinary.name}". Downloading...`)
         const binaryPath = await tc.downloadTool(astBinary.browser_download_url)
         await fs.chmod(binaryPath, 0o755);
         const destPath = "garden";
