@@ -31,47 +31,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setupCluster = exports.CLUSTERS = void 0;
+exports.deployService = void 0;
 const core = __importStar(require("@actions/core"));
 const core_1 = require("@actions/core");
 // @ts-ignore
 const await_exec_1 = __importDefault(require("await-exec"));
-exports.CLUSTERS = [
-    {
-        clusterName: 'headout',
-        clusterRegion: 'us-east-1',
-        gardenEnv: "production",
-        isProduction: true,
-        matchDeployEnv: (deployEnv) => deployEnv === 'production'
-    },
-    {
-        clusterName: 'test-cluster',
-        clusterRegion: 'ap-south-1',
-        gardenEnv: "test",
-        isProduction: false,
-        matchDeployEnv: () => true
-    }
-];
-function setupCluster() {
+function deployService(cluster) {
     return __awaiter(this, void 0, void 0, function* () {
-        core.startGroup('Setup Cluster');
-        const deployEnv = core.getInput('deploy-env', { required: true });
-        const cluster = yield loginToCluster(deployEnv);
-        core.setOutput('cluster-name', cluster.clusterName);
-        core.setOutput('cluster-region', cluster.clusterRegion);
-        core.setOutput('is-production', cluster.isProduction);
+        core.startGroup('Deploy Service');
+        let cmd = `garden deploy --env ${cluster.gardenEnv}`;
+        try {
+            yield (0, await_exec_1.default)(cmd, {
+                log: true,
+                env: Object.assign(Object.assign({}, process.env), { GARDEN_LOGGER_TYPE: "basic", NAMESPACE: "cd" })
+            });
+        }
+        catch (ex) {
+            (0, core_1.error)(`Unable to deploy, error: ${ex}`);
+            throw ex;
+        }
         core.endGroup();
-        return cluster;
     });
 }
-exports.setupCluster = setupCluster;
-function loginToCluster(deployEnv) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const matchedCluster = exports.CLUSTERS.find((cluster) => cluster.matchDeployEnv(deployEnv));
-        if (!matchedCluster)
-            throw new Error('unable to find any valid cluster');
-        (0, core_1.info)(`Deploying to cluster: ${JSON.stringify(matchedCluster)}`);
-        yield (0, await_exec_1.default)(`eksctl utils write-kubeconfig --region "${matchedCluster.clusterRegion}" --cluster "${matchedCluster.clusterName}"`, { log: true });
-        return matchedCluster;
-    });
-}
+exports.deployService = deployService;

@@ -30,9 +30,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const garden_1 = require("./garden");
 const core = __importStar(require("@actions/core"));
+const clusters_1 = require("./clusters");
+const deploy_1 = require("./deploy");
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        (0, garden_1.setupGarden)();
+        yield (0, garden_1.setupGarden)();
+        yield (0, deploy_1.deployService)(yield (0, clusters_1.setupCluster)());
     });
 }
 main().catch(core.setFailed);

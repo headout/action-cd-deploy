@@ -1310,9 +1310,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const garden_1 = __webpack_require__(365);
 const core = __importStar(__webpack_require__(470));
+const clusters_1 = __webpack_require__(662);
+const deploy_1 = __webpack_require__(988);
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        (0, garden_1.setupGarden)();
+        yield (0, garden_1.setupGarden)();
+        yield (0, deploy_1.deployService)(yield (0, clusters_1.setupCluster)());
     });
 }
 main().catch(core.setFailed);
@@ -5104,6 +5107,91 @@ module.exports = require("net");
 
 /***/ }),
 
+/***/ 662:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.setupCluster = exports.CLUSTERS = void 0;
+const core = __importStar(__webpack_require__(470));
+const core_1 = __webpack_require__(470);
+// @ts-ignore
+const await_exec_1 = __importDefault(__webpack_require__(702));
+exports.CLUSTERS = [
+    {
+        clusterName: 'headout',
+        clusterRegion: 'us-east-1',
+        gardenEnv: "production",
+        isProduction: true,
+        matchDeployEnv: (deployEnv) => deployEnv === 'production'
+    },
+    {
+        clusterName: 'test-cluster',
+        clusterRegion: 'ap-south-1',
+        gardenEnv: "test",
+        isProduction: false,
+        matchDeployEnv: () => true
+    }
+];
+function setupCluster() {
+    return __awaiter(this, void 0, void 0, function* () {
+        core.startGroup('Setup Cluster');
+        const deployEnv = core.getInput('deploy-env', { required: true });
+        const cluster = yield loginToCluster(deployEnv);
+        core.setOutput('cluster-name', cluster.clusterName);
+        core.setOutput('cluster-region', cluster.clusterRegion);
+        core.setOutput('is-production', cluster.isProduction);
+        core.endGroup();
+        return cluster;
+    });
+}
+exports.setupCluster = setupCluster;
+function loginToCluster(deployEnv) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const matchedCluster = exports.CLUSTERS.find((cluster) => cluster.matchDeployEnv(deployEnv));
+        if (!matchedCluster)
+            throw new Error('unable to find any valid cluster');
+        (0, core_1.info)(`Deploying to cluster: ${JSON.stringify(matchedCluster)}`);
+        yield (0, await_exec_1.default)(`eksctl utils write-kubeconfig --region "${matchedCluster.clusterRegion}" --cluster "${matchedCluster.clusterName}"`, { log: true });
+        return matchedCluster;
+    });
+}
+
+
+/***/ }),
+
 /***/ 669:
 /***/ (function(module) {
 
@@ -5304,6 +5392,33 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = {
     GARDEN_CACHE_KEY: "garden",
 };
+
+
+/***/ }),
+
+/***/ 702:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const cp = __webpack_require__(129)
+
+module.exports = Exec
+
+function Exec (command, options = { log: false, cwd: process.cwd() }) {
+  if (options.log) console.log(command)
+
+  return new Promise((done, failed) => {
+    cp.exec(command, { ...options }, (err, stdout, stderr) => {
+      if (err) {
+        err.stdout = stdout
+        err.stderr = stderr
+        failed(err)
+        return
+      }
+
+      done({ stdout, stderr })
+    })
+  })
+}
 
 
 /***/ }),
@@ -5784,6 +5899,70 @@ function getExecOutput(commandLine, args, options) {
 }
 exports.getExecOutput = getExecOutput;
 //# sourceMappingURL=exec.js.map
+
+/***/ }),
+
+/***/ 988:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.deployService = void 0;
+const core = __importStar(__webpack_require__(470));
+const core_1 = __webpack_require__(470);
+// @ts-ignore
+const await_exec_1 = __importDefault(__webpack_require__(702));
+function deployService(cluster) {
+    return __awaiter(this, void 0, void 0, function* () {
+        core.startGroup('Deploy Service');
+        let cmd = `garden deploy --env ${cluster.gardenEnv}`;
+        try {
+            yield (0, await_exec_1.default)(cmd, {
+                log: true,
+                env: Object.assign(Object.assign({}, process.env), { GARDEN_LOGGER_TYPE: "basic", NAMESPACE: "cd" })
+            });
+        }
+        catch (ex) {
+            (0, core_1.error)(`Unable to deploy, error: ${ex}`);
+            throw ex;
+        }
+        core.endGroup();
+    });
+}
+exports.deployService = deployService;
+
 
 /***/ })
 
