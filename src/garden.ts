@@ -38,7 +38,8 @@ async function installGarden(inpVersion: string): Promise<string | undefined> {
     } else {
         url = 'https://api.github.com/repos/garden-io/garden/releases/latest'
     }
-    let release = await findValidAsset(url, `${getPlatform()}-amd64`)
+    let folderName = `${getPlatform()}-amd64`
+    let release = await findValidAsset(url, folderName)
     info(`Found valid Garden release: ${release.tag_name}`)
     let astBinary: ISdkAsset | undefined
     let astCheck: ISdkAsset | undefined
@@ -50,7 +51,8 @@ async function installGarden(inpVersion: string): Promise<string | undefined> {
     if (astBinary && astCheck) {
         info(`Found matching tar: "${astBinary.name}". Downloading...`)
         const tarPath = await tc.downloadTool(astBinary.browser_download_url, astBinary.name)
-        const binaryPath = await tc.extractTar(tarPath)
+        const binaryPath = `${await tc.extractTar(tarPath)}/${folderName}`
+        info(`Extracted tar to path: "${binaryPath}"`)
         return await tc.cacheDir(
             binaryPath,
             constant.GARDEN_CACHE_KEY,
