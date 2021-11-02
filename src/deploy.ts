@@ -10,8 +10,8 @@ export async function deployService(cluster: ICluster) {
     let cmdEnv = { GARDEN_LOGGER_TYPE: "basic", NAMESPACE: "cd" }
     info(`Executing "${cmd}" with env: ${JSON.stringify(cmdEnv)}`)
     try {
-        const cp = exec.command(cmd, { env: cmdEnv })
-        cp.stdout?.pipe(process.stdout)
+        const cp = exec.command(cmd, { env: cmdEnv, all: true })
+        cp.all?.pipe(process.stdout)
         await cp
     } catch (ex) {
         error(`Unable to deploy, error: ${ex}`)

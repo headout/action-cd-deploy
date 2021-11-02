@@ -45,8 +45,8 @@ async function loginToCluster(deployEnv: string): Promise<ICluster> {
     info(`Deploying to cluster: ${JSON.stringify(matchedCluster)}`)
     const cmd = `eksctl utils write-kubeconfig --region "${matchedCluster.clusterRegion}" --cluster "${matchedCluster.clusterName}"`
     info(`Executing: ${cmd}`)
-    const cp = exec.command(cmd)
-    cp.stdout?.pipe(process.stdout)
+    const cp = exec.command(cmd, { all: true })
+    cp.all?.pipe(process.stdout)
     await cp
     return matchedCluster
 }
