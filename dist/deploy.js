@@ -44,8 +44,8 @@ function deployService(cluster) {
         let cmdEnv = { GARDEN_LOGGER_TYPE: "basic", NAMESPACE: "cd" };
         (0, core_1.info)(`Executing "${cmd}" with env: ${JSON.stringify(cmdEnv)}`);
         try {
-            const cp = execa_1.default.command(cmd, { env: cmdEnv });
-            (_a = cp.stdout) === null || _a === void 0 ? void 0 : _a.pipe(process.stdout);
+            const cp = execa_1.default.command(cmd, { env: cmdEnv, all: true });
+            (_a = cp.all) === null || _a === void 0 ? void 0 : _a.pipe(process.stdout);
             yield cp;
         }
         catch (ex) {
