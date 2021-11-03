@@ -50,7 +50,7 @@ async function installGarden(inpVersion: string): Promise<string | undefined> {
     }
     if (astBinary && astCheck) {
         info(`Found matching tar: "${astBinary.name}". Downloading...`)
-        const tarPath = await tc.downloadTool(astBinary.browser_download_url, astBinary.name)
+        const tarPath = await tc.downloadTool(astBinary.browser_download_url, `/tmp/${astBinary.name}`)
         const binaryPath = `${await tc.extractTar(tarPath)}/${folderName}`
         info(`Extracted tar to path: "${binaryPath}"`)
         return await tc.cacheDir(

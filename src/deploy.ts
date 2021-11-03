@@ -7,7 +7,7 @@ export async function deployService(cluster: ICluster) {
     core.startGroup('Deploy Service')
     const { stdout: context } = await exec('kubectl', ['config', 'current-context'])
     let cmd = `garden deploy --env ${cluster.gardenEnv} --var kubeContext=${context}`
-    let cmdEnv = { GARDEN_LOGGER_TYPE: "basic", NAMESPACE: "cd" }
+    let cmdEnv = { GARDEN_LOGGER_TYPE: "basic", GARDEN_DISABLE_ANALYTICS: true, NAMESPACE: "cd" }
     info(`Executing "${cmd}" with env: ${JSON.stringify(cmdEnv)}`)
     try {
         const cp = exec.command(cmd, { env: cmdEnv, all: true })
