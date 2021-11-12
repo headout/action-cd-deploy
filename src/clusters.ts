@@ -29,7 +29,8 @@ export const CLUSTERS: ICluster[] = [
 
 export async function setupCluster(): Promise<ICluster> {
     core.startGroup('Setup Cluster')
-    const deployEnv = core.getInput('deploy-env', { required: true })
+    let deployEnv = core.getInput('deploy-env', { required: true })
+    deployEnv = deployEnv.trim().toLowerCase()
     const cluster = await loginToCluster(deployEnv)
     await assertCurrentContext()
     core.setOutput('cluster-name', cluster.clusterName)
