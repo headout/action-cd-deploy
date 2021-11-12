@@ -40,8 +40,11 @@ function deployService(cluster) {
     return __awaiter(this, void 0, void 0, function* () {
         core.startGroup('Deploy Service');
         const { stdout: context } = yield (0, execa_1.default)('kubectl', ['config', 'current-context']);
-        let cmd = `garden deploy --env ${cluster.gardenEnv} --var kubeContext=${context}`;
-        let cmdEnv = { GARDEN_LOGGER_TYPE: "basic", NAMESPACE: "cd" };
+        let cmd = `garden deploy --env ${cluster.gardenEnv} --var kubeContext=${context} -l debug`;
+        if (cluster.isProduction) {
+            cmd = `${cmd} --yes`;
+        }
+        let cmdEnv = { GARDEN_LOGGER_TYPE: "basic", GARDEN_DISABLE_ANALYTICS: "true", NAMESPACE: "cd" };
         (0, core_1.info)(`Executing "${cmd}" with env: ${JSON.stringify(cmdEnv)}`);
         try {
             const cp = execa_1.default.command(cmd, { env: cmdEnv, all: true });

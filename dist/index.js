@@ -3794,7 +3794,7 @@ function installGarden(inpVersion) {
         }
         if (astBinary && astCheck) {
             (0, core_1.info)(`Found matching tar: "${astBinary.name}". Downloading...`);
-            const tarPath = yield tc.downloadTool(astBinary.browser_download_url, astBinary.name);
+            const tarPath = yield tc.downloadTool(astBinary.browser_download_url, `/tmp/${astBinary.name}`);
             const binaryPath = `${yield tc.extractTar(tarPath)}/${folderName}`;
             (0, core_1.info)(`Extracted tar to path: "${binaryPath}"`);
             return yield tc.cacheDir(binaryPath, constants_1.default.GARDEN_CACHE_KEY, release.tag_name);
@@ -6773,7 +6773,8 @@ exports.CLUSTERS = [
 function setupCluster() {
     return __awaiter(this, void 0, void 0, function* () {
         core.startGroup('Setup Cluster');
-        const deployEnv = core.getInput('deploy-env', { required: true });
+        let deployEnv = core.getInput('deploy-env', { required: true });
+        deployEnv = deployEnv.trim().toLowerCase();
         const cluster = yield loginToCluster(deployEnv);
         yield assertCurrentContext();
         core.setOutput('cluster-name', cluster.clusterName);
@@ -8442,8 +8443,11 @@ function deployService(cluster) {
     return __awaiter(this, void 0, void 0, function* () {
         core.startGroup('Deploy Service');
         const { stdout: context } = yield (0, execa_1.default)('kubectl', ['config', 'current-context']);
-        let cmd = `garden deploy --env ${cluster.gardenEnv} --var kubeContext=${context}`;
-        let cmdEnv = { GARDEN_LOGGER_TYPE: "basic", NAMESPACE: "cd" };
+        let cmd = `garden deploy --env ${cluster.gardenEnv} --var kubeContext=${context} -l debug`;
+        if (cluster.isProduction) {
+            cmd = `${cmd} --yes`;
+        }
+        let cmdEnv = { GARDEN_LOGGER_TYPE: "basic", GARDEN_DISABLE_ANALYTICS: "true", NAMESPACE: "cd" };
         (0, core_1.info)(`Executing "${cmd}" with env: ${JSON.stringify(cmdEnv)}`);
         try {
             const cp = execa_1.default.command(cmd, { env: cmdEnv, all: true });

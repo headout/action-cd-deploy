@@ -51,7 +51,8 @@ exports.CLUSTERS = [
 function setupCluster() {
     return __awaiter(this, void 0, void 0, function* () {
         core.startGroup('Setup Cluster');
-        const deployEnv = core.getInput('deploy-env', { required: true });
+        let deployEnv = core.getInput('deploy-env', { required: true });
+        deployEnv = deployEnv.trim().toLowerCase();
         const cluster = yield loginToCluster(deployEnv);
         yield assertCurrentContext();
         core.setOutput('cluster-name', cluster.clusterName);
